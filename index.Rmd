@@ -15,7 +15,7 @@ library(plotly)
 
 ### Introduction
 
-
+hi
 
 - [Week 7 · Computational Musicology and (Audio) Visualisation](./notes/compmus2025-w07.html)
 
