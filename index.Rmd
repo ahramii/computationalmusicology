@@ -13,9 +13,7 @@ library(flexdashboard)
 library(plotly)
 ```
 
-### Welcome to Computational Musicology 2025
-
-Welcome to Computational Musicology 2025.
+### Introduction
 
 
 
@@ -31,6 +29,7 @@ ggplotly()
 
 ***
 
+### Conclusion
 
 
 
