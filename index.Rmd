@@ -11,26 +11,57 @@ output:
 library(tidyverse)
 library(flexdashboard)
 library(plotly)
+read_csv("compmus2025.csv")
+compmus2025 <- read_csv("compmus2025.csv")
 ```
 
 ### Introduction
 
 hi
 
-- [Week 7 · Computational Musicology and (Audio) Visualisation](./notes/compmus2025-w07.html)
+
 
 ### Visualisation
 
 ```{r}
 
-ggplotly()
+read_csv("compmus2025.csv")
+
+# Identify your own tracks (replace with actual track identifiers)
+
+my_tracks <- compmus2025 %>%
+  filter(filename == "filename") 
+
+# Modify this condition to match your tracks
+
+          
+  # Start with the data
+  # Calculate average feature values for corpus
+avg_features <- compmus2025 %>%
+  summarise(across(c(approachability, arousal, danceability, engagingness, 
+                     instrumentalness, tempo, valence), mean, na.rm = TRUE))
+
+
+plot <- ggplot(compmus2025, aes(x = tempo, y = arousal, size = instrumentalness, colour = danceability)) +
+  geom_point(alpha = 0.7) +  # Scatter plot
+  geom_point(data = my_tracks, aes(x = tempo, y = arousal), colour = "red", size = 4, shape = 4) +  # Highlight your tracks
+  geom_hline(yintercept = avg_features$arousal, linetype = "dashed", color = "blue") +  # Average arousal line
+  geom_vline(xintercept = avg_features$tempo, linetype = "dashed", color = "blue") +  # Average tempo line
+  labs(title = "Track Feature Visualization", x = "Tempo", y = "Arousal", size = "Instrumentalness", colour = "Danceability") +
+  theme_minimal()
+
+ggplotly(plot)  # Make interactive
+
 ```
 
 
 ***
 
 ### Conclusion
+```{r}
 
+
+```
 
 
 
