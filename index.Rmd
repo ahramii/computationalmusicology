@@ -11,6 +11,8 @@ output:
 library(tidyverse)
 library(flexdashboard)
 library(plotly)
+library(dplyr)
+library(ggplot2) 
 read_csv("compmus2025.csv")
 compmus2025 <- read_csv("compmus2025.csv")
 ```
@@ -22,6 +24,8 @@ hi
 
 
 ### Visualisation
+
+<div style="height: auto; overflow-y: scroll;">
 
 ```{r}
 
@@ -49,8 +53,8 @@ plot <- ggplot(compmus2025, aes(x = tempo, y = arousal, size = instrumentalness,
   geom_vline(xintercept = avg_features$tempo, linetype = "dashed", color = "blue") +  # Average tempo line
   labs(title = "Track Feature Visualization", x = "Tempo", y = "Arousal", size = "Instrumentalness", colour = "Danceability") +
   theme_minimal()
-
-ggplotly(plot)  # Make interactive
+  
+ggplotly(plot) %>% layout(height = 600)
 
 ```
 
