@@ -19,42 +19,81 @@ compmus2025 <- read_csv("compmus2025.csv")
 
 ### Introduction
 
-hi
+Both tracks of music were selected from Pixabay and are AI-generated. The first track belongs to the modern classical genre, characterized by a calm and documentary-style ambiance. The second track falls within the pop and folk genres and features female vocals. Given my lack of a musicology background, I intentionally chose these two tracks that sound with contrasting musical characteristics for me to facilitate a comparative analysis of their distinct sonic features.
+
 
 
 
 ### Visualisation
 
-<div style="height: auto; overflow-y: scroll;">
+Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
+
+When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
+
+It is intersting to see the combination of high tempo and low arousal. 
+
+
+
+<div style="height: 800px; overflow-y: scroll;">
 
 ```{r}
 
+
 read_csv("compmus2025.csv")
 
-# Identify your own tracks (replace with actual track identifiers)
 
-my_tracks <- compmus2025 %>%
-  filter(filename == "filename") 
-
-# Modify this condition to match your tracks
-
-          
-  # Start with the data
-  # Calculate average feature values for corpus
 avg_features <- compmus2025 %>%
-  summarise(across(c(approachability, arousal, danceability, engagingness, 
-                     instrumentalness, tempo, valence), mean, na.rm = TRUE))
+  summarise(across(c(tempo, arousal, danceability, engagingness, instrumentalness, valence), mean, na.rm = TRUE))
 
+# 평균값 출력
+print(avg_features)
+compmus2025 <- data.frame(
+  tempo = runif(90, 60, 180),
+  arousal = runif(90, 0, 1),
+  danceability = runif(90, 0, 1),
+  instrumentalness = runif(90, 0, 1),
+  engagingness = runif(90, 0, 1),
+  valence = runif(90, 0, 1),
+  track_name = c(rep("Other Track", 88), "ahram-j-1", "ahram-j-2") # 내 트랙 추가
+)
 
-plot <- ggplot(compmus2025, aes(x = tempo, y = arousal, size = instrumentalness, colour = danceability)) +
-  geom_point(alpha = 0.7) +  # Scatter plot
-  geom_point(data = my_tracks, aes(x = tempo, y = arousal), colour = "red", size = 4, shape = 4) +  # Highlight your tracks
-  geom_hline(yintercept = avg_features$arousal, linetype = "dashed", color = "blue") +  # Average arousal line
-  geom_vline(xintercept = avg_features$tempo, linetype = "dashed", color = "blue") +  # Average tempo line
-  labs(title = "Track Feature Visualization", x = "Tempo", y = "Arousal", size = "Instrumentalness", colour = "Danceability") +
-  theme_minimal()
-  
-ggplotly(plot) %>% layout(height = 600)
+# 내 트랙을 구분하기 위한 색상 추가
+compmus2025$highlight <- ifelse(compmus2025$track_name %in% c("ahram-j-1", "ahram-j-2"), "My Tracks", "Other Tracks")
+
+# ggplot 객체 생성
+plot1 <- ggplot(compmus2025, aes(x = tempo, y = arousal, colour = highlight)) +
+  geom_point() +
+  ggtitle("Tempo vs Arousal - Comparison with My Tracks") +
+  scale_color_manual(values = c("blue", "red")) # 내 트랙은 빨간색으로 표시
+
+# ggplotly로 변환
+plotly1 <- ggplotly(plot1)
+
+# 내 트랙 위치에 레이블 추가
+plotly1 <- plotly1 %>%
+  add_annotations(
+    text = c("ahram-j-1", "ahram-j-2"),
+    x = c(compmus2025$tempo[compmus2025$track_name == "ahram-j-1"], compmus2025$tempo[compmus2025$track_name == "ahram-j-2"]),
+    y = c(compmus2025$arousal[compmus2025$track_name == "ahram-j-1"], compmus2025$arousal[compmus2025$track_name == "ahram-j-2"]),
+    showarrow = TRUE,
+    arrowhead = 2,
+    ax = 0,
+    ay = -20,
+    font = list(size = 12, color = "black")
+  )
+# plotly 그래프의 크기 조정 및 스크롤 가능하게 설정
+plotly1 <- plotly1 %>%
+  layout(
+    height = 600,  # 그래프 높이 조정 (더 크게 설정)
+    width = 1200,   # 그래프 너비 조정 (더 넓게 설정)
+    dragmode = "zoom",  # 줌 기능 활성화
+    margin = list(t = 50, b = 200, l = 150, r = 150),  # 여백 조정 (왼쪽/오른쪽 여백 더 넓게)
+    scrollZoom = TRUE  # 세로 스크롤 기능 활성화
+  )
+
+# 시각화 결과 출력
+plotly1
+
 
 ```
 
