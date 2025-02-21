@@ -26,11 +26,11 @@ Both tracks of music were selected from Pixabay and are AI-generated. The first 
 
 ### Visualisation
 
-Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
+>Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
 
-When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
+>When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
 
-It is intersting to see the combination of high tempo and low arousal!
+>It is intersting to see the combination of high tempo and low arousal!
 
 
 
@@ -42,58 +42,66 @@ It is intersting to see the combination of high tempo and low arousal!
 read_csv("compmus2025.csv")
 
 
+# 평균값 계산 후 표 출력
 avg_features <- compmus2025 %>%
   summarise(across(c(tempo, arousal, danceability, engagingness, instrumentalness, valence), mean, na.rm = TRUE))
 
-# 평균값 출력
-print(avg_features)
-compmus2025 <- data.frame(
-  tempo = runif(90, 60, 180),
-  arousal = runif(90, 0, 1),
-  danceability = runif(90, 0, 1),
-  instrumentalness = runif(90, 0, 1),
-  engagingness = runif(90, 0, 1),
-  valence = runif(90, 0, 1),
-  track_name = c(rep("Other Track", 88), "ahram-j-1", "ahram-j-2") # 내 트랙 추가
+knitr::kable(avg_features)  # 표 형태로 출력
+
+# 내 트랙 정보 추가 (기존 데이터 유지)
+my_tracks <- data.frame(
+  tempo = c(120, 130),  # 실제 값으로 수정 가능
+  arousal = c(0.3, 0.4),
+  danceability = c(0.5, 0.45),
+  instrumentalness = c(0.2, 0.15),
+  engagingness = c(0.4, 0.35),
+  valence = c(0.2, 0.25),
+  track_name = c("ahram-j-1", "ahram-j-2")
 )
 
-# 내 트랙을 구분하기 위한 색상 추가
-compmus2025$highlight <- ifelse(compmus2025$track_name %in% c("ahram-j-1", "ahram-j-2"), "My Tracks", "Other Tracks")
+# 데이터 합치기
+compmus2025 <- bind_rows(compmus2025, my_tracks)
 
-# ggplot 객체 생성
+# 트랙 구분을 위한 색상 지정
+compmus2025 <- compmus2025 %>%
+  mutate(highlight = ifelse(track_name %in% c("ahram-j-1", "ahram-j-2"), "My Tracks", "Other Tracks"))
+
+# ggplot 시각화
 plot1 <- ggplot(compmus2025, aes(x = tempo, y = arousal, colour = highlight)) +
   geom_point() +
   ggtitle("Tempo vs Arousal - Comparison with My Tracks") +
-  scale_color_manual(values = c("blue", "red")) # 내 트랙은 빨간색으로 표시
+  scale_color_manual(values = c("blue", "red")) +  # 내 트랙을 빨간색으로 표시
+  theme_minimal()
 
-# ggplotly로 변환
+# ggplotly 변환
 plotly1 <- ggplotly(plot1)
 
-# 내 트랙 위치에 레이블 추가
+# 내 트랙의 위치를 필터링 후 레이블 추가
+my_track_positions <- compmus2025 %>%
+  filter(track_name %in% c("ahram-j-1", "ahram-j-2")) %>%
+  select(track_name, tempo, arousal)
+
 plotly1 <- plotly1 %>%
   add_annotations(
-    text = c("ahram-j-1", "ahram-j-2"),
-    x = c(compmus2025$tempo[compmus2025$track_name == "ahram-j-1"], compmus2025$tempo[compmus2025$track_name == "ahram-j-2"]),
-    y = c(compmus2025$arousal[compmus2025$track_name == "ahram-j-1"], compmus2025$arousal[compmus2025$track_name == "ahram-j-2"]),
+    text = my_track_positions$track_name,
+    x = my_track_positions$tempo,
+    y = my_track_positions$arousal,
     showarrow = TRUE,
     arrowhead = 2,
     ax = 0,
     ay = -20,
     font = list(size = 12, color = "black")
-  )
-# plotly 그래프의 크기 조정 및 스크롤 가능하게 설정
-plotly1 <- plotly1 %>%
+  ) %>%
   layout(
-    height = 600,  # 그래프 높이 조정 (더 크게 설정)
-    width = 1200,   # 그래프 너비 조정 (더 넓게 설정)
-    dragmode = "zoom",  # 줌 기능 활성화
-    margin = list(t = 50, b = 200, l = 150, r = 150),  # 여백 조정 (왼쪽/오른쪽 여백 더 넓게)
-    scrollZoom = TRUE  # 세로 스크롤 기능 활성화
+    height = 500,  # 적절한 그래프 크기 조정
+    width = 1000,
+    dragmode = "zoom",
+    margin = list(t = 50, b = 150, l = 100, r = 100),
+    scrollZoom = TRUE  # 줌 & 스크롤 가능하게 설정
   )
 
-# 시각화 결과 출력
+# 그래프 출력
 plotly1
-
 
 ```
 
