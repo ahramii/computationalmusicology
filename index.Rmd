@@ -9,10 +9,12 @@ output:
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+source("compmus.R")
 library(flexdashboard)
 library(plotly)
 library(dplyr)
 library(ggplot2) 
+library(rjson)
 read_csv("compmus2025.csv")
 compmus2025 <- read_csv("compmus2025.csv")
 ```
@@ -21,98 +23,83 @@ compmus2025 <- read_csv("compmus2025.csv")
 
 Both tracks of music were selected from Pixabay and are AI-generated. The first track belongs to the modern classical genre, characterized by a calm and documentary-style ambiance. The second track falls within the pop and folk genres and features female vocals. Given my lack of a musicology background, I intentionally chose these two tracks that sound with contrasting musical characteristics for me to facilitate a comparative analysis of their distinct sonic features.
 
-
-
-
 ### Visualisation
 
->Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
-
->When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
-
->It is intersting to see the combination of high tempo and low arousal!
-
-
-
-<div style="height: 800px; overflow-y: scroll;">
+These are chromagram of the file "ahram-j-1" and "ahram-j-2"
 
 ```{r}
+"features/ahram-j-1.json" |>                          
+  compmus_chroma(norm = "identity") |>                
+  ggplot(aes(x = time, y = pc, fill = value)) + 
+  geom_raster() +
+  scale_y_continuous(
+    breaks = 0:11,
+    minor_breaks = NULL,
+    labels = c(
+                "C", "C#|Db", "D", "D#|Eb",
+                "E", "F", "F#|Gb", "G",
+                "G#|Ab", "A", "A#|Bb", "B"
+              )
+  ) +
+  scale_fill_viridis_c(guide = "none") +              
+  
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic() 
 
-
-read_csv("compmus2025.csv")
-
-
-# 평균값 계산 후 표 출력
-avg_features <- compmus2025 %>%
-  summarise(across(c(tempo, arousal, danceability, engagingness, instrumentalness, valence), mean, na.rm = TRUE))
-
-knitr::kable(avg_features)  # 표 형태로 출력
-
-# 내 트랙 정보 추가 (기존 데이터 유지)
-my_tracks <- data.frame(
-  tempo = c(120, 130),  # 실제 값으로 수정 가능
-  arousal = c(0.3, 0.4),
-  danceability = c(0.5, 0.45),
-  instrumentalness = c(0.2, 0.15),
-  engagingness = c(0.4, 0.35),
-  valence = c(0.2, 0.25),
-  track_name = c("ahram-j-1", "ahram-j-2")
-)
-
-# 데이터 합치기
-compmus2025 <- bind_rows(compmus2025, my_tracks)
-
-# 트랙 구분을 위한 색상 지정
-compmus2025 <- compmus2025 %>%
-  mutate(highlight = ifelse(track_name %in% c("ahram-j-1", "ahram-j-2"), "My Tracks", "Other Tracks"))
-
-# ggplot 시각화
-plot1 <- ggplot(compmus2025, aes(x = tempo, y = arousal, colour = highlight)) +
-  geom_point() +
-  ggtitle("Tempo vs Arousal - Comparison with My Tracks") +
-  scale_color_manual(values = c("blue", "red")) +  # 내 트랙을 빨간색으로 표시
-  theme_minimal()
-
-# ggplotly 변환
-plotly1 <- ggplotly(plot1)
-
-# 내 트랙의 위치를 필터링 후 레이블 추가
-my_track_positions <- compmus2025 %>%
-  filter(track_name %in% c("ahram-j-1", "ahram-j-2")) %>%
-  select(track_name, tempo, arousal)
-
-plotly1 <- plotly1 %>%
-  add_annotations(
-    text = my_track_positions$track_name,
-    x = my_track_positions$tempo,
-    y = my_track_positions$arousal,
-    showarrow = TRUE,
-    arrowhead = 2,
-    ax = 0,
-    ay = -20,
-    font = list(size = 12, color = "black")
-  ) %>%
-  layout(
-    height = 500,  # 적절한 그래프 크기 조정
-    width = 1000,
-    dragmode = "zoom",
-    margin = list(t = 50, b = 150, l = 100, r = 100),
-    scrollZoom = TRUE  # 줌 & 스크롤 가능하게 설정
-  )
-
-# 그래프 출력
-plotly1
-
+"features/ahram-j-2.json" |>   
+  compmus_chroma(norm = "identity") |>                 # Change the norm
+  ggplot(aes(x = time, y = pc, fill = value)) + 
+  geom_raster() +
+  scale_y_continuous(
+    breaks = 0:11,
+    minor_breaks = NULL,
+    labels = c(
+                "C", "C#|Db", "D", "D#|Eb",
+                "E", "F", "F#|Gb", "G",
+                "G#|Ab", "A", "A#|Bb", "B"
+              )
+  ) +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()     
 ```
 
+Below, there are "ahram-j-1"'s chroma-based self-similarity and Timbre-based self-similarity.
 
-***
+```{r}
+# Chroma-based self-similarity
+
+"features/ahram-j-1.json" |>                        
+  compmus_chroma(norm = "identity") |>                 # Change the norm
+  compmus_self_similarity(
+    feature = pc,
+    distance = "euclidean"                 ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()                                      
+
+# Timbre-based self-similarity
+
+"features/ahram-j-1.json" |>                          
+  compmus_mfccs(norm = "identity") |>                  # Change the norm
+  compmus_self_similarity(
+    feature = mfcc,
+    distance = "euclidean"       
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()                                     
+```
+
+------------------------------------------------------------------------
 
 ### Conclusion
+
 ```{r}
 
 
 ```
-
-
-
