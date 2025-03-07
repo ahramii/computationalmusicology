@@ -109,8 +109,7 @@ The Timbre-based self-similarity capture the changes in spectral characteristics
 ------------------------------------------------------------------------
 
 ### Analysis of Chords
-
-> This graph shows the analysis of track "ahram-j-1".
+This graph shows the analysis of track "ahram-j-1".
  The most commonly matched chords are Gmaj, Cmaj, and Dmaj. It shows a clear tonal center with recurring progressions. 
 
 ```{r, chords}
