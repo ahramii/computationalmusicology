@@ -15,6 +15,7 @@ library(plotly)
 library(dplyr)
 library(ggplot2) 
 library(rjson)
+library(gridExtra)
 read_csv("compmus2025.csv")
 compmus2025 <- read_csv("compmus2025.csv")
 ```
@@ -33,10 +34,8 @@ Title: Whispers of the Trees
 
 ### Chromagram comparison 
 
-These are chromagram of the file "ahram-j-1" and "ahram-j-2". Both tracks display activity across all 12 pitch. Firsth track has distinct clusters of pitch class activation while second one appears more evenly distributed in pitch activation. There some temporal pauses in the first and more continuous spread of activation in the second. The major key pitches are noticeable in the first. 
-
 ```{r, chromagram}
-"features/ahram-j-1.json" |>                          
+plot1 <- "features/ahram-j-1.json" |>                          
   compmus_chroma(norm = "identity") |>                
   ggplot(aes(x = time, y = pc, fill = value)) + 
   geom_raster() +
@@ -54,7 +53,7 @@ These are chromagram of the file "ahram-j-1" and "ahram-j-2". Both tracks displa
   labs(x = "Time (s)", y = NULL, fill = NULL) +
   theme_classic() 
 
-"features/ahram-j-2.json" |>   
+plot2 <-"features/ahram-j-2.json" |>   
   compmus_chroma(norm = "identity") |>                 # Change the norm
   ggplot(aes(x = time, y = pc, fill = value)) + 
   geom_raster() +
@@ -70,17 +69,20 @@ These are chromagram of the file "ahram-j-1" and "ahram-j-2". Both tracks displa
   scale_fill_viridis_c(guide = "none") +               # Change the colours?
   labs(x = "Time (s)", y = NULL, fill = NULL) +
   theme_classic()     
+
+grid.arrange(plot1, plot2, ncol=2)
 ```
 
+***
+
+These are chromagram of the file "ahram-j-1" and "ahram-j-2". Both tracks display activity across all 12 pitch. Firsth track has distinct clusters of pitch class activation while second one appears more evenly distributed in pitch activation. There some temporal pauses in the first and more continuous spread of activation in the second. The major key pitches are noticeable in the first. 
+
 ### Self-similarity 
-Below, there are "ahram-j-1"'s chroma-based self-similarity and Timbre-based self-similarity.
-The chroma-based self-similarity shows more detailed and fragmented indicating frequent harmonic shifts. 
-The Timbre-based self-similarity capture the changes in spectral characteristics and show a more structured appearance, suggesting clearer section repetitions. 
 
 ```{r, self-similarity}
 # Chroma-based self-similarity
 
-"features/ahram-j-1.json" |>                        
+plot1 <- "features/ahram-j-1.json" |>                        
   compmus_chroma(norm = "identity") |>                 # Change the norm
   compmus_self_similarity(
     feature = pc,
@@ -93,7 +95,7 @@ The Timbre-based self-similarity capture the changes in spectral characteristics
 
 # Timbre-based self-similarity
 
-"features/ahram-j-1.json" |>                          
+plot2 <-"features/ahram-j-1.json" |>                          
   compmus_mfccs(norm = "identity") |>                  # Change the norm
   compmus_self_similarity(
     feature = mfcc,
@@ -103,14 +105,19 @@ The Timbre-based self-similarity capture the changes in spectral characteristics
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +               # Change the colours?
   labs(x = "Time (s)", y = NULL, fill = NULL) +
-  theme_classic()                                     
+  theme_classic()    
+grid.arrange(plot1, plot2, ncol=2)
 ```
+
+***
+
+Below, there are "ahram-j-1"'s chroma-based self-similarity and Timbre-based self-similarity.
+The chroma-based self-similarity shows more detailed and fragmented indicating frequent harmonic shifts. 
+The Timbre-based self-similarity capture the changes in spectral characteristics and show a more structured appearance, suggesting clearer section repetitions. 
 
 ------------------------------------------------------------------------
 
 ### Analysis of Chords
-This graph shows the analysis of track "ahram-j-1".
- The most commonly matched chords are Gmaj, Cmaj, and Dmaj. It shows a clear tonal center with recurring progressions. 
 
 ```{r, chords}
 
@@ -198,7 +205,7 @@ key_templates <-
 
 # start the code for my file
 
-"features/ahram-j-1.json" |> 
+plot1 <-"features/ahram-j-1.json" |> 
   compmus_chroma(norm = "identity") |> 
   compmus_match_pitch_templates(
     chord_templates,         
@@ -211,18 +218,106 @@ key_templates <-
   labs(x = "Time (s)", y = "Template", fill = NULL) +
   theme_classic()                                      # Change the theme?
 
+
+plot2 <-"features/ahram-j-2.json" |> 
+  compmus_chroma(norm = "identity") |> 
+  compmus_match_pitch_templates(
+    chord_templates,         
+    norm = "identity",       # Try different norms (and match it with what you used in `compmus_chroma`)
+    distance = "cosine"   # Try different distance metrics
+  ) |>
+  ggplot(aes(x = time, y = name, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = "Template", fill = NULL) +
+  theme_classic()                                      # Change the theme?
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+***
+
+This graph shows the analysis of track "ahram-j-1".
+ The most commonly matched chords are Gmaj, Cmaj, and Dmaj. It shows a clear tonal center with recurring progressions. 
+ 
+
+### Novelty Functions 
+```{r, novelty}
+plot1 <- "features/ahram-j-1.json" |>
+  compmus_energy_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Energy Novelty")
+
+plot2 <-"features/ahram-j-2.json" |>
+  compmus_energy_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Energy Novelty")
+
+plot3 <-"features/ahram-j-1.json" |>
+  compmus_spectral_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Spectral Novelty")
+
+plot4 <-"features/ahram-j-2.json" |>
+  compmus_spectral_novelty() |> 
+  ggplot(aes(t, novelty)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Spectral Novelty")
+
+grid.arrange(plot1, plot2, plot3, plot4, ncol=2)
+
+```
+
+
+### Tempograms 
+```{r, Tempograms}
+
+plot1 <-"features/ahram-j-1.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+plot2 <-"features/ahram-j-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+
+plot3 <-"features/ahram-j-1.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+
+plot4 <-"features/ahram-j-2.json" |>
+  compmus_tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+grid.arrange(plot1, plot2, plot3, plot4, ncol=2)
+
 ```
 
 
 ###  Comparison with the class corpus
-
->Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
-
->When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
-
->It is intersting to see the combination of high tempo and low arousal. 
-
-
 
 <div style="height: 800px; overflow-y: scroll;">
 
@@ -294,3 +389,76 @@ plotly1 <- plotly1 %>%
 plotly1
 
 ```
+
+***
+
+Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
+
+When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
+
+It is intersting to see the combination of high tempo and low arousal. 
+
+### Tempo comparison with class corpus 
+
+```{r, classcorpustempo}
+# Read class corpus data
+compmus2025 <- read_csv("compmus2025.csv")
+
+# Add my track information
+my_tracks <- data.frame(
+  tempo = c(120, 130),  # Update with actual values
+  arousal = c(0.3, 0.4),
+  danceability = c(0.5, 0.45),
+  instrumentalness = c(0.2, 0.15),
+  engagingness = c(0.4, 0.35),
+  valence = c(0.2, 0.25),
+  track_name = c("ahram-j-1", "ahram-j-2")
+)
+
+# Merge datasets
+compmus2025 <- bind_rows(compmus2025, my_tracks)
+
+# Add a highlight column
+compmus2025 <- compmus2025 %>%
+  mutate(highlight = ifelse(track_name %in% c("ahram-j-1", "ahram-j-2"), "My Tracks", "Other Tracks"))
+
+# Create histogram
+plot2 <- ggplot(compmus2025, aes(x = tempo, fill = highlight)) +
+  geom_histogram(binwidth = 5, color = "black", alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = c("blue", "red")) +  # My tracks in red, others in blue
+  labs(title = "Histogram of Tempi in Class Corpus",
+       x = "Tempo (BPM)",
+       y = "Frequency") +
+  theme_minimal()
+
+# Convert to interactive plot
+plotly2 <- ggplotly(plot2)
+
+# Add annotations for my tracks
+my_track_positions <- compmus2025 %>%
+  filter(track_name %in% c("ahram-j-1", "ahram-j-2")) %>%
+  select(track_name, tempo)
+
+plotly2 <- plotly2 %>%
+  add_annotations(
+    text = my_track_positions$track_name,
+    x = my_track_positions$tempo,
+    y = 1,  # Adjust position to show labels inside the histogram
+    showarrow = TRUE,
+    arrowhead = 2,
+    ax = 0,
+    ay = -20,
+    font = list(size = 12, color = "black")
+  ) %>%
+  layout(
+    height = 500,  
+    width = 1000,
+    dragmode = "zoom",
+    margin = list(t = 50, b = 150, l = 100, r = 100),
+    scrollZoom = TRUE  
+  )
+
+# Display the plot
+plotly2
+```
+
