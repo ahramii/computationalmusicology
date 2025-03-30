@@ -45,7 +45,7 @@ get_pr <- function(fit) {
 
 Welcome! In this flexdashboard, two tracks of music will be analysed. 
 
-Both tracks of music were selected from Pixabay and are AI-generated. Those tracks were selected based on the criteria: AI-generated / distict style - classical and folk with vocal / time duration 
+Both tracks of music were selected from Pixabay and are AI-generated to avoide copt right issue. Those tracks were selected based on the criteria: AI-generated / distict style - classical and folk with vocal / time duration 
 
 The first track belongs to the modern classical genre, characterized by a calm and documentary-style ambiance. 
 
