@@ -43,7 +43,15 @@ get_pr <- function(fit) {
 
 ### Introduction
 
-Both tracks of music were selected from Pixabay and are AI-generated. The first track belongs to the modern classical genre, characterized by a calm and documentary-style ambiance. The second track falls within the pop and folk genres and features female vocals. Given my lack of a musicology background, I intentionally chose these two tracks that sound with contrasting musical characteristics for me to facilitate a comparative analysis of their distinct sonic features.
+Welcome! In this flexdashboard, two tracks of music will be analysed. 
+
+Both tracks of music were selected from Pixabay and are AI-generated. Those tracks were selected based on the criteria: AI-generated / distict style - classical and folk with vocal / time duration 
+
+The first track belongs to the modern classical genre, characterized by a calm and documentary-style ambiance. 
+
+The second track falls within the pop and folk genres and features female vocals. 
+
+I intentionally chose these two tracks that sound with contrasting musical characteristics to facilitate a comparative analysis of their distinct sonic features. 
 
 1. ahram-j-1 
 Title: Shadows of Time 
@@ -96,9 +104,15 @@ grid.arrange(plot1, plot2, ncol=2)
 
 ***
 
-These are chromagram of the file "ahram-j-1" and "ahram-j-2". Both tracks display activity across all 12 pitch. Firsth track has distinct clusters of pitch class activation while second one appears more evenly distributed in pitch activation. There some temporal pauses in the first and more continuous spread of activation in the second. The major key pitches are noticeable in the first. 
+These are chromagram of the file "ahram-j-1" and "ahram-j-2". Firsth track has distinct clusters of pitch class activation while second one appears more evenly distributed in pitch activation. 
 
-### Self-similarity 
+For the first track, the graph demonstrates the change in F# to G during 60-80 seconds aligns with the sound of track which piano changes the chord. At the end of the music, E major chord dominates in the first track while the second track does not show evenly distributed major chord rather than dominant chord leading. 
+
+There some temporal pauses in the first and more continuous spread of activation in the second. 
+
+The graphs show that there are spread of major chord activation in both tracks. 
+
+### Self-similarity (ahram-j-1 track) 
 
 ```{r, self-similarity}
 # Chroma-based self-similarity
@@ -132,11 +146,58 @@ grid.arrange(plot1, plot2, ncol=2)
 
 ***
 
-Below, there are "ahram-j-1"'s chroma-based self-similarity and Timbre-based self-similarity.
-The chroma-based self-similarity shows more detailed and fragmented indicating frequent harmonic shifts. 
-The Timbre-based self-similarity capture the changes in spectral characteristics and show a more structured appearance, suggesting clearer section repetitions. 
+Below, there are "ahram-j-1"'s chroma-based self-similarity and Timbre-based self-similarity. Throughout the track, the recurring theme and repetitio of piano is noticeable. 
+
+The first graph is a chroma-based self-similarity that shows more detailed and fragmented indicating frequent harmonic shifts. However, it is interesting how the graphs is computed as I noticed a quite lots of repetetions of same chord thorughout the track but the graphs shows a little about it. 
+
+The second graph is timbre-based self-similarity capture the changes in spectral characteristics and show a more structured appearance, suggesting clearer section repetitions with more checkerboard patterns as the the piano leads the track. 
 
 ------------------------------------------------------------------------
+
+### Self-similarity (ahram-j-2 track) 
+
+```{r, self-similarity2}
+# Chroma-based self-similarity
+
+plot1 <- "features/ahram-j-2.json" |>                        
+  compmus_chroma(norm = "identity") |>                 # Change the norm
+  compmus_self_similarity(
+    feature = pc,
+    distance = "cosine"                 ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()                                      
+
+# Timbre-based self-similarity
+
+plot2 <-"features/ahram-j-2.json" |>                          
+  compmus_mfccs(norm = "identity") |>                  # Change the norm
+  compmus_self_similarity(
+    feature = mfcc,
+    distance = "cosine"       
+  ) |>   
+  ggplot(aes(x = xtime, y = ytime, fill = d)) + 
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +               # Change the colours?
+  labs(x = "Time (s)", y = NULL, fill = NULL) +
+  theme_classic()    
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+***
+
+Below, there are "ahram-j-2"'s chroma-based self-similarity and Timbre-based self-similarity.
+
+
+It is interesting that the diagonal line is clearly visable compared to "ahram-j-1" track. 
+I wonder whether this happened because there is a vocal appears with the background sound of instruments. 
+
+The chroma-based self-similarity shows more spread of bright sections The varied and frequent changes in color suggest that the harmonic content of this track is rich and dynamic, featuring numerous chords or tonal shifts.
+
+The Timbre-based self-similarity capture the changes in spectral characteristics and show a more structured appearance of checkerboard patterns, suggesting clearer section repetitions. Around 150-170 seconds, the brighter patterns are noticeable which I think the disapperance of background instruments sound is reflected on the graph.  
+
 
 ### Analysis of Chords
 
@@ -257,8 +318,11 @@ grid.arrange(plot1, plot2, ncol=2)
 
 ***
 
-This graph shows the analysis of track "ahram-j-1".
- The most commonly matched chords are Gmaj, Cmaj, and Dmaj. It shows a clear tonal center with recurring progressions. 
+This graph shows the analysis of track "ahram-j-1" and "ahram-j-2".
+
+On the left, the graph shows"ahram-j-1" track. The chords' distribution appeared quite varied, with a mix of major and minor chords across the timeline. The noticeable darker area in Emin and Cmaj till around 100 seconds withe the sudden appearance of Cmin is noticeable. 
+
+On the right, the graphs of "ahram-j-2" shows a smoother or more consistent distribution of chords over time compared to the first one. It suggests a simpler harmonic structure.
  
 
 ### Novelty Functions 
@@ -295,6 +359,17 @@ grid.arrange(plot1, plot2, plot3, plot4, ncol=2)
 
 ```
 
+***
+On the top, there is a "ahram-j-1" track on the left and "ahram-j-2" track on the right. 
+
+The top left, the energy novelty shows the peaks representing moments where there's a significant variation in the energy content- like introduction of a louder section or onset burts on intensity. It is interesting how the graph is depicted as high energy novelty around 115 and 155 seconds as there is no noticeable changes in loudness in track. 
+
+The top right, the graph of "ahram-j-2" shows the peaks appearing slightly less pronounced but more frequent compared to the left graph. The highest peaks may indicate the loudness of vocal in the beginning. 
+
+
+The bottom left, the graph of first track focuses on the changes in the frequency spectrum corresponding to momenets where new tonal elements are introduced or where instruments shift dramatically. The magnitude of the peaks is smaller than energy novelty. The graphs clearly shows he introduction and appearance of piano sound with highest novelty and consistent novelty after. 
+
+The bottom rifht, the graph of second track shows peaks similar to the left but with more regularity suggesting a track that adheres to consistent timbral changes. Compared to the left, the distributed spetral novelty are higher which may apply the tonal changes in vocal with the background instrumental sound. 
 
 ### Tempograms 
 ```{r, Tempograms}
@@ -337,6 +412,15 @@ grid.arrange(plot1, plot2, plot3, plot4, ncol=2)
 
 ```
 
+***
+
+On the top, it is interesting how both shows multiple horizontal lines espescially right graph. Does it show tempo of various sounds like vocal and other instruments? 
+
+On the bottom, the cyclic tempograms of two tracks show more clear overview of tempo. 
+
+The left graph on the bottom shows more steady and slow tempo as the track is consist of piano sound with not changes in tempo. 
+
+The right graph on the bottom is more interesting showing the sudden increase after 100 and around 150 seconds which the vocal sound dominates the track and may be applied to the graph or error to indicate the correst tempo. Before 50 second, there is a sudden adrupt change in tempo. After that, the graph locate the main tempo from the track and steadblize it, 
 
 ### Tempo comparison with class corpus 
 
@@ -402,6 +486,49 @@ plotly2 <- plotly2 %>%
 plotly2
 ```
 
+***
+
+This is histogram of tempi in class corpus. The largest number of tracks in class corpus is 155 bpm and lowest is 145 bpm. 
+
+"ahram-j-1" and "ahram-j-2" tracks' tempos are 120 and 130 each with other 5 more tracks as same tempo.
+
+
+It is interesting that there are higher number in faster tempo. 
+
+### Clustering  
+```{r, clustering}
+compmus2025 <- read_csv("compmus2025.csv")
+
+cluster_juice <-
+  recipe(
+    filename ~
+      arousal +
+      danceability +
+      instrumentalness +
+      tempo +
+      valence,
+    data = compmus2025
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(compmus2025) |>
+  juice() |>
+  column_to_rownames("filename")
+
+compmus_dist <- dist(cluster_juice, method = "euclidean")
+
+compmus_dist |> 
+  hclust(method = "single") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+```
+
+***
+
+This is hierarchical clustering of the class corpus which is showing which goes together and which is not. It shows the nearest neighbor linkage and smallest distance between tracks. This helps identify which in the corpus the strongest relationships with each other. 
+
+
 ### Classification 
 ```{r, classification}
 
@@ -442,7 +569,6 @@ classification_knn |> get_conf_mat() |> autoplot(type = "mosaic")
 
 classification_knn |> get_conf_mat() |> autoplot(type = "heatmap")
 
-
 classification_knn |> get_pr()
 
 forest_model <-
@@ -457,6 +583,8 @@ indie_forest <-
     compmus_cv, 
     control = control_resamples(save_pred = TRUE)
   )
+
+
 
 indie_forest |> get_pr()
 
@@ -487,9 +615,22 @@ compmus2025_filtered |>
 
 ```
 
-###  Comparison with the class corpus
+***
 
-<div style="height: 800px; overflow-y: scroll;">
+The first mosaic form of distinguishing the portion of  prediction and truth that identify the AI-generated and non-AI-generated tracks after classification which specific label whether is AI generated or not. 
+
+The second graph is heatmap form showing the number of features in each sections. 
+
+Both forms show that the precision is higher showing higher true positive. 
+
+Below the random forests give us a ranking of feature importance by random. The most important feature is instrumentalness and the least is tempo. 
+
+Last is scatter plot including arousal, valence, tempo, and how it is generated.  
+
+
+
+
+###  Comparison with the class corpus
 
 ```{r, classcorpus}
 
@@ -564,6 +705,20 @@ plotly1
 
 Compare to the class corpus, my track ahram-j-1 and ahram-j-2 are slightly more approachable and significantly lower arousal levels which can lead to lower danceability. Furthermore, both are less engaging that the class average with less instrumental content. Both have higher tempo and lower valence. 
 
-When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. 
+When it comes to arousal, tempo, and valence, my tracks are quite different from the class average. Both of tracks are locating the lowest in the graph. 
 
 It is intersting to see the combination of high tempo and low arousal. 
+
+
+### Conclusion 
+
+
+Lack of background knowledge in musicology cause unorganized and less-detailed interpretation specifically comparing the chords or key notes with the graph and track. 
+
+However, the graphs for each features provide the information of data through the visualisation which helps to understand the musical features easily, especially for people who does not have musical background. Even though the cross checking with the actual sound of music is essential to develop the interpretation, it guide to which area we need to look deeper to compare how the computational tool analyze. 
+
+It seems there is more potential to develop and analyze the music since it is getting difficult to distinguish the AI-generated music.
+
+
+
+
